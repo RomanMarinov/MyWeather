@@ -1,6 +1,7 @@
 package com.dev_marinov.myweathernow;
 
 import android.app.AlertDialog;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -16,6 +17,7 @@ import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,6 +25,7 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 public class FragmentMenuWeather extends Fragment {
 
@@ -32,6 +35,9 @@ public class FragmentMenuWeather extends Fragment {
     Button btnGet, btnChoose;
     String output = "";
     private AlphaAnimation alphaAnim_btnGet, alphaAnim_btChoose;
+
+    private ProgressBar mHorizontalProgressBar; // прогресс бар для имитации загрузки
+    TextView tvShowProgress; // сообщение о процессе загрузки
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -47,6 +53,10 @@ public class FragmentMenuWeather extends Fragment {
         tvResult = frag.findViewById(R.id.tvResult);
         btnGet = frag.findViewById(R.id.btnGet);
         btnChoose = frag.findViewById(R.id.btnChoose);
+
+        tvShowProgress = frag.findViewById(R.id.tvShowProgress);
+        mHorizontalProgressBar = frag.findViewById(R.id.mHorizontalProgressBar);
+        mHorizontalProgressBar.setVisibility(View.INVISIBLE);
 
         // если поле ввода для получения погоды будет пусто и поле вывода инфо о погоде тоже станет пустым
         textInputEditTextCity.addTextChangedListener(new TextWatcher() {
@@ -68,26 +78,30 @@ public class FragmentMenuWeather extends Fragment {
         btnGet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+               myAsyncTask myAsyncTask = new myAsyncTask();
+               myAsyncTask.execute(output); //список адресов файлов для загрузки
+
                 btnGet.setAlpha(1f); // анимания кнопки затухание
                 btnGet.startAnimation(alphaAnim_btnGet);
-                String city = textInputEditTextCity.getText().toString().trim();
-
-                if(city.equals("")) // если ничего не введено, то сообщение
-                {
-                    Toast.makeText(getContext(), "Please, write the name of the city or country", Toast.LENGTH_SHORT).show();
-                }
-                else
-                {
-                    // проверка интернера при отправке запроса на сервер
-                    if(CheckNetwork.isInternetAvailable(getContext())) //returns true if internet available
-                    {
-                        ((MainActivity)getActivity()).getWeatherDetail(city);
-                    }
-                    else
-                    {
-                        Toast.makeText(getContext(),"No Internet Connection",1000).show();
-                    }
-                }
+//                String city = textInputEditTextCity.getText().toString().trim();
+//
+//                if(city.equals("")) // если ничего не введено, то сообщение
+//                {
+//                    Toast.makeText(getContext(), "Please, write the name of the city or country", Toast.LENGTH_SHORT).show();
+//                }
+//                else
+//                {
+//                    // проверка интернера при отправке запроса на сервер
+//                    if(CheckNetwork.isInternetAvailable(getContext())) //returns true if internet available
+//                    {
+//                        //((MainActivity)getActivity()).getWeatherDetail(city);
+//                    }
+//                    else
+//                    {
+//                        Toast.makeText(getContext(),"No Internet Connection",1000).show();
+//                    }
+//                }
             }
         });
             // кн выбора страны чтобы посмотреть там погоду и переход во фрагмент со списоком стран
@@ -103,6 +117,7 @@ public class FragmentMenuWeather extends Fragment {
                 {
                     textInputEditTextCity.setText("");
                     tvResult.setText("");
+                    tvShowProgress.setText("");
                     // задержка перехода во фрагмент нужна для того, чтобы до конца сработала анимация нажатия кнопки
                     // а то не красиво
                     new Timer().schedule(new TimerTask() {
@@ -127,14 +142,17 @@ public class FragmentMenuWeather extends Fragment {
         return frag;
     }
 
-    public void getOutPut(String output) // метод получения данных погоды и отображения
+    public void getOutPut(String outputStr) // метод получения данных погоды и отображения
     {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                tvResult.setText(output);
-            }
-        });
+        //Log.e("666","-outputStr-" + outputStr);
+        output = outputStr;
+
+//        getActivity().runOnUiThread(new Runnable() { // отображение в главном потоке
+//            @Override
+//            public void run() {
+//                //tvResult.setText(outputStr);
+//            }
+//        });
     }
     // получение названия выбранной стары из клика адаптера и отображение в эдиттекст
     public void getChooseCityInAdapter(String selectCity)
@@ -155,4 +173,94 @@ public class FragmentMenuWeather extends Fragment {
         alphaAnim_btChoose.setDuration(500);
     }
 
+    //////////////////////////////////////////////
+    class myAsyncTask extends AsyncTask<String, Integer, Void> {
+
+        @Override
+        protected void onPreExecute() { // мы устанавливаем начальный текст перед выполнением задачи.
+            super.onPreExecute();
+            tvShowProgress.setText("data search...");
+            mHorizontalProgressBar.setVisibility(View.VISIBLE);
+        }
+
+        // Методы onProgressUpdate() выполняются в потоке UI, потому мы можем смело обращаться к нашим компонентам UI.
+        // Метод onProgressUpdate() используется для вывода промежуточных результатов и имеет доступ к UI.
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+            tvShowProgress.setText("process...");
+            // tvShowProgress.setText("Этаж: " + values[0]); // было
+            mHorizontalProgressBar.setProgress(values[0]);
+        }
+
+
+        @Override
+        protected Void doInBackground(String... urls) { // было (Void... voids)
+            try {
+
+                // тяжелый код который должен быть тут
+                String city = textInputEditTextCity.getText().toString().trim();
+
+                if (city.equals("")) // если ничего не введено, то сообщение
+                {
+                    Toast.makeText(getContext(), "Please, write the name of the city or country", Toast.LENGTH_SHORT).show();
+                } else {
+                    // проверка интернера при отправке запроса на сервер
+                    if (CheckNetwork.isInternetAvailable(getContext())) //returns true if internet available
+                    {
+                        ((MainActivity)getActivity()).getWeatherDetail(city);
+                    } else {
+                        Toast.makeText(getContext(), "No Internet Connection", 1000).show();
+                    }
+                }
+
+
+                int counter = 0;
+                for (String url : urls) {
+                    Log.e("666","-url-" + url);
+                    Log.e("666","-urls-" + urls);
+                    // загружаем файл или лезем на другой этаж
+                    getFloor(counter);
+                    Log.e("666","-counter до publishProgress-");
+                    // выводим промежуточные результаты
+                    // Таким образом, метод publishProgress() является своеобразным мостиком для передачи данных
+                    // из doInBackground() в onProgressUpdate(). Мы передаём значение счётчика, которое выводится в текстовой метке.
+                    // Когда мы в методе doInBackground() вызываем метод publishProgress() и передаём туда данные,
+                    // то срабатывает метод onProgressUpdate(), который получает эти данные. Тип принимаемых данных
+                    // равен второму типу из угловых скобок, у нас это Integer.
+                    publishProgress(++counter);
+                    Log.e("666","-counter после publishProgress-");
+                }
+                TimeUnit.SECONDS.sleep(1); // задержка выполнения участка try
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        // Методы onPostExecute() выполняются в потоке UI, потому мы можем смело обращаться к нашим компонентам UI.
+        // onPostExecute() вызываются системой в начале и конце выполнения задачи
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            tvShowProgress.setText("successful data received ✔");
+            tvResult.setText(output);
+            //Log.e("666","-output-" + output);
+            //mStartButton.setVisibility(View.VISIBLE);
+            mHorizontalProgressBar.setProgress(100);
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    mHorizontalProgressBar.setVisibility(View.INVISIBLE);
+                }
+            },1000);
+        }
+
+// Здесь мы реализуем свою логику тяжёлой работы. Пока у нас здесь просто пауза на одну секунду.
+        private void getFloor(int floor) throws InterruptedException {
+            TimeUnit.SECONDS.sleep(1);
+        }
+        //////////////////////////////////////////////
+    }
 }

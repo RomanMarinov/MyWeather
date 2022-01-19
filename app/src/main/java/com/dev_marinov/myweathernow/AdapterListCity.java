@@ -69,6 +69,7 @@ class AdapterListCity extends RecyclerView.Adapter<AdapterListCity.Holder> {
                 FragmentMenuWeather fragmentMenuWeather = (FragmentMenuWeather) fragmentManager.findFragmentById(R.id.ll_frag_menu_weather);
                 if(fragmentMenuWeather != null)
                 {
+                    
                     String name = objectListCity.name;
                     fragmentMenuWeather.getChooseCityInAdapter(name);
                     Log.e("333ADAP","-click name-" + name);

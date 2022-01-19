@@ -73,69 +73,73 @@ public class MainActivity extends AppCompatActivity{
 
     // получить данные погоды о городе. метод срабатывает только при нажатии кн get во FragmentMenuWeather
     public void getWeatherDetail(String city) {
-        Log.e("333MAIN_ACT", "-сработал getWeatherDetail-");
-        String tempUrl =  "";
-        if(!city.equals(""))
-        {
-            tempUrl = url + "?q=" + city + "&appid=" + appId;
 
-            // сайт просмотра json http://jsonviewer.stack.hu/
-            StringRequest stringRequest = new StringRequest(Request.Method.POST, tempUrl, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    Log.e("333MAIN_ACT", "-response-" + response);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Log.e("333MAIN_ACT", "-сработал getWeatherDetail-");
+                String tempUrl =  "";
+                if(!city.equals(""))
+                {
+                    tempUrl = url + "?q=" + city + "&appid=" + appId;
 
-                    String output = "";
-                    try {
-                        // строку response в JSONObject
-                        JSONObject jsonObjectResponce = new JSONObject(response);
-                        // получаем из jsonObjectResponce данные по ключу weather
-                        JSONArray jsonArrayWeather = jsonObjectResponce.getJSONArray("weather");
-                        // получаем из jsonArrayWeather получаем данные индекс 0
-                        JSONObject jsonObject_O = jsonArrayWeather.getJSONObject(0);
-                        // получаем из jsonObject_O строку description
-                        String description = jsonObject_O.getString("description"); // -----------------> данные для отображения=
+                    // сайт просмотра json http://jsonviewer.stack.hu/
+                    StringRequest stringRequest = new StringRequest(Request.Method.POST, tempUrl, new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            Log.e("333MAIN_ACT", "-response-" + response);
 
-                        // получаем из jsonObjectResponce данные по ключу main
-                        JSONObject jsonObjectMain = jsonObjectResponce.getJSONObject("main");
-                        // получаем из jsonObjectMain double значение по ключу temp
-                        double temp = jsonObjectMain.getDouble("temp") - 273.15; // -----------------> данные для отображения=
-                        // получаем из jsonObjectMain double значение по ключу feels_like
-                        double feelsLike = jsonObjectMain.getDouble("feels_like") - 273.15; // -----------------> данные для отображения=
-                        // получаем из jsonObjectMain double значение по ключу temp_min
-                        double temp_min = jsonObjectMain.getDouble("temp_min") - 273.15; // -----------------> данные для отображения=
-                        // получаем из jsonObjectMain double значение по ключу temp_max
-                        double temp_max = jsonObjectMain.getDouble("temp_max") - 273.15; // -----------------> данные для отображения=
-                        // получаем из jsonObjectMain int значение по ключу pressure
-                        int pressure = jsonObjectMain.getInt("pressure"); // -----------------> данные для отображения=
-                        // получаем из jsonObjectMain int значение по ключу humidity
-                        int humidity = jsonObjectMain.getInt("humidity"); // -----------------> данные для отображения=
+                            String output = "";
+                            try {
+                                // строку response в JSONObject
+                                JSONObject jsonObjectResponce = new JSONObject(response);
+                                // получаем из jsonObjectResponce данные по ключу weather
+                                JSONArray jsonArrayWeather = jsonObjectResponce.getJSONArray("weather");
+                                // получаем из jsonArrayWeather получаем данные индекс 0
+                                JSONObject jsonObject_O = jsonArrayWeather.getJSONObject(0);
+                                // получаем из jsonObject_O строку description
+                                String description = jsonObject_O.getString("description"); // -----------------> данные для отображения=
 
-                        // получаем из jsonObjectResponce данные int по ключу clouds
-                        JSONObject jsonObjectClouds = jsonObjectResponce.getJSONObject("clouds"); // -----------------> данные для отображения=
-                        int clouds = jsonObjectClouds.getInt("all");
+                                // получаем из jsonObjectResponce данные по ключу main
+                                JSONObject jsonObjectMain = jsonObjectResponce.getJSONObject("main");
+                                // получаем из jsonObjectMain double значение по ключу temp
+                                double temp = jsonObjectMain.getDouble("temp") - 273.15; // -----------------> данные для отображения=
+                                // получаем из jsonObjectMain double значение по ключу feels_like
+                                double feelsLike = jsonObjectMain.getDouble("feels_like") - 273.15; // -----------------> данные для отображения=
+                                // получаем из jsonObjectMain double значение по ключу temp_min
+                                double temp_min = jsonObjectMain.getDouble("temp_min") - 273.15; // -----------------> данные для отображения=
+                                // получаем из jsonObjectMain double значение по ключу temp_max
+                                double temp_max = jsonObjectMain.getDouble("temp_max") - 273.15; // -----------------> данные для отображения=
+                                // получаем из jsonObjectMain int значение по ключу pressure
+                                int pressure = jsonObjectMain.getInt("pressure"); // -----------------> данные для отображения=
+                                // получаем из jsonObjectMain int значение по ключу humidity
+                                int humidity = jsonObjectMain.getInt("humidity"); // -----------------> данные для отображения=
 
-                        // получаем из jsonObjectResponce данные по ключу wind
-                        JSONObject jsonObjectWind = jsonObjectResponce.getJSONObject("wind");
-                        // получаем из jsonObjectWind строку speed
-                        String speed = jsonObjectWind.getString("speed"); // -----------------> данные для отображения=
-                        // получаем из jsonObjectWind строку deg
-                        String deg = jsonObjectWind.getString("deg"); // -----------------> данные для отображения=
+                                // получаем из jsonObjectResponce данные int по ключу clouds
+                                JSONObject jsonObjectClouds = jsonObjectResponce.getJSONObject("clouds"); // -----------------> данные для отображения=
+                                int clouds = jsonObjectClouds.getInt("all");
 
-                        // получаем из jsonObjectResponce строку name
-                        String name = jsonObjectResponce.getString("name"); // -----------------> данные для отображения=
+                                // получаем из jsonObjectResponce данные по ключу wind
+                                JSONObject jsonObjectWind = jsonObjectResponce.getJSONObject("wind");
+                                // получаем из jsonObjectWind строку speed
+                                String speed = jsonObjectWind.getString("speed"); // -----------------> данные для отображения=
+                                // получаем из jsonObjectWind строку deg
+                                String deg = jsonObjectWind.getString("deg"); // -----------------> данные для отображения=
 
-                        output = "City: " + name
-                                + "\ndescription: " + description
-                                + "\ntemp: " + decimalFormat.format(temp)  + " ℃"
-                                + "\ntemp min: " + decimalFormat.format(temp_min) + " ℃"
-                                + "\ntemp max: " + decimalFormat.format(temp_max)  + " ℃"
-                                + "\nfeels like: " + decimalFormat.format(feelsLike) + " ℃"
-                                + "\npreassure: " + pressure + " hPa"
-                                + "\nhumidity: " + humidity + " %"
-                                + "\ncloudnes: " + clouds + " %"
-                                + "\nwind speed: " + speed + " m/s"
-                                + "\ndeg: " + deg;
+                                // получаем из jsonObjectResponce строку name
+                                String name = jsonObjectResponce.getString("name"); // -----------------> данные для отображения=
+
+                                output = "City: " + name
+                                        + "\ndescription: " + description
+                                        + "\ntemp: " + decimalFormat.format(temp)  + " ℃"
+                                        + "\ntemp min: " + decimalFormat.format(temp_min) + " ℃"
+                                        + "\ntemp max: " + decimalFormat.format(temp_max)  + " ℃"
+                                        + "\nfeels like: " + decimalFormat.format(feelsLike) + " ℃"
+                                        + "\npreassure: " + pressure + " hPa"
+                                        + "\nhumidity: " + humidity + " %"
+                                        + "\ncloudnes: " + clouds + " %"
+                                        + "\nwind speed: " + speed + " m/s"
+                                        + "\ndeg: " + deg;
 
                                 String finalOutput = output; // переменная для хранения данных о погоде
                                 // передача во врагмент данных
@@ -145,20 +149,23 @@ public class MainActivity extends AppCompatActivity{
                                     fragmentMenuWeather.getOutPut(finalOutput);
                                 }
 
-                    } catch (JSONException e) {
-                        Log.e("333MAIN_ACT", "-try catch-" + e);
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Toast.makeText(getApplicationContext(), "error searching -> " + error.toString().trim(), Toast.LENGTH_SHORT).show();
-                }
-            });
+                            } catch (JSONException e) {
+                                Log.e("333MAIN_ACT", "-try catch-" + e);
+                            }
+                        }
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Toast.makeText(getApplicationContext(), "error searching -> " + error.toString().trim(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
 
-            RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
-            requestQueue.add(stringRequest);
-        }
+                    RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+                    requestQueue.add(stringRequest);
+                }
+            }
+        }).start();
+
     }
 
     // анимация букв при старте приложения
