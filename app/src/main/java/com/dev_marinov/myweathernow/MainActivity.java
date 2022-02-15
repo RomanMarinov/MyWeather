@@ -7,6 +7,7 @@ import androidx.fragment.app.FragmentTransaction;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -47,6 +48,7 @@ public class MainActivity extends AppCompatActivity{
     Animation animation;
     LinearLayout llTvAnim;
     LinearLayout ll_frag_menu_weather, ll_frag_choose;
+    SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -362,6 +364,32 @@ public class MainActivity extends AppCompatActivity{
             }
         });
         alertDialog.show();
+    }
+
+    // считывает файл (для реализации офлайн режима, если нет инета,
+    // то польз. получит последние полученные данные, если делал запрос)
+    public String loadSettingString(String key,String default_value)
+    {
+        // List_contact - имя файла, MODE_MULTI_PROCESS - доступ для всех процессов
+        sharedPreferences = getSharedPreferences("List_contact", MODE_MULTI_PROCESS);
+        return sharedPreferences.getString(key, default_value);
+    }
+
+    public void saveSettingString(String key, String value) {
+        // List_contact - имя файла куда будут сохраняться данные, MODE_MULTI_PROCESS - доступ для всех процессов
+        sharedPreferences = getSharedPreferences("List_contact", MODE_MULTI_PROCESS);
+        SharedPreferences.Editor ed = sharedPreferences.edit(); // edit() - редактирование файлов
+        ed.putString(key, value); // добавляем ключ и его значение
+
+        if (ed.commit()) // сохранить файл
+        {
+            //успешно записано данные в файл
+        }
+        else
+        {
+            //ошибка при записи
+            Toast.makeText(this, "Write error", Toast.LENGTH_SHORT).show();
+        }
     }
 
 }

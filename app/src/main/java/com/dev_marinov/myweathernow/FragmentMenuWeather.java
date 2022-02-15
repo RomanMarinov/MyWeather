@@ -79,29 +79,37 @@ public class FragmentMenuWeather extends Fragment {
             @Override
             public void onClick(View view) {
 
-               myAsyncTask myAsyncTask = new myAsyncTask();
-               myAsyncTask.execute(output); //список адресов файлов для загрузки
-
                 btnGet.setAlpha(1f); // анимания кнопки затухание
                 btnGet.startAnimation(alphaAnim_btnGet);
-//                String city = textInputEditTextCity.getText().toString().trim();
-//
-//                if(city.equals("")) // если ничего не введено, то сообщение
-//                {
-//                    Toast.makeText(getContext(), "Please, write the name of the city or country", Toast.LENGTH_SHORT).show();
-//                }
-//                else
-//                {
-//                    // проверка интернера при отправке запроса на сервер
-//                    if(CheckNetwork.isInternetAvailable(getContext())) //returns true if internet available
-//                    {
-//                        //((MainActivity)getActivity()).getWeatherDetail(city);
-//                    }
-//                    else
-//                    {
-//                        Toast.makeText(getContext(),"No Internet Connection",1000).show();
-//                    }
-//                }
+
+                String city = textInputEditTextCity.getText().toString().trim();
+
+                if (city.equals("")) // если ничего не введено, то сообщение
+                {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getContext(), "Please, write the name of the city or country", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else {
+                    // проверка интернера при отправке запроса на сервер
+                    if (CheckNetwork.isInternetAvailable(getContext())) //возвращает true, если интернет доступен
+                    {
+
+                        myAsyncTask myAsyncTask = new myAsyncTask();
+                        myAsyncTask.execute(output); //список адресов файлов для загрузки
+
+                        ((MainActivity)getActivity()).getWeatherDetail(city);
+                    } else {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getContext(), "No Internet Connection", 1000).show();
+                            }
+                        });
+                    }
+                }
             }
         });
             // кн выбора страны чтобы посмотреть там погоду и переход во фрагмент со списоком стран
@@ -199,20 +207,7 @@ public class FragmentMenuWeather extends Fragment {
             try {
 
                 // тяжелый код который должен быть тут
-                String city = textInputEditTextCity.getText().toString().trim();
 
-                if (city.equals("")) // если ничего не введено, то сообщение
-                {
-                    Toast.makeText(getContext(), "Please, write the name of the city or country", Toast.LENGTH_SHORT).show();
-                } else {
-                    // проверка интернера при отправке запроса на сервер
-                    if (CheckNetwork.isInternetAvailable(getContext())) //returns true if internet available
-                    {
-                        ((MainActivity)getActivity()).getWeatherDetail(city);
-                    } else {
-                        Toast.makeText(getContext(), "No Internet Connection", 1000).show();
-                    }
-                }
 
 
                 int counter = 0;
