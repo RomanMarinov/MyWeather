@@ -114,6 +114,7 @@ public class FragmentMenuWeather extends Fragment {
                             });
 
                         ((MainActivity)getActivity()).getWeatherDetail(city);
+
                     } else {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
@@ -169,7 +170,7 @@ public class FragmentMenuWeather extends Fragment {
         output = outputStr;
     }
 
-    // получение названия выбранной стары из клика адаптера и отображение в эдиттекст
+    // получение названия выбранной страны из клика адаптера и отображение в эдиттекст
     public void getChooseCityInAdapter(String selectCity)
     {
         getActivity().runOnUiThread(new Runnable() {
