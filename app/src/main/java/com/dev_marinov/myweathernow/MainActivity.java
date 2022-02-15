@@ -47,6 +47,9 @@ public class MainActivity extends AppCompatActivity{
     Animation animation;
     LinearLayout llTvAnim;
     LinearLayout ll_frag_menu_weather, ll_frag_choose;
+    String finalOutput;
+    boolean flagCheckCorrectRespone;
+    MyInterFace myInterFace;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +91,7 @@ public class MainActivity extends AppCompatActivity{
                         @Override
                         public void onResponse(String response) {
                             Log.e("333MAIN_ACT", "-response-" + response);
+
 
                             String output = "";
                             try {
@@ -141,12 +145,20 @@ public class MainActivity extends AppCompatActivity{
                                         + "\nwind speed: " + speed + " m/s"
                                         + "\ndeg: " + deg;
 
-                                String finalOutput = output; // переменная для хранения данных о погоде
+                                finalOutput = output; // переменная для хранения данных о погоде
+                                //flagCheckCorrectRespone = true;
+
+                                myInterFace.methodInterface(true);
+
+
+
                                 // передача во врагмент данных
                                 FragmentMenuWeather fragmentMenuWeather = (FragmentMenuWeather) getSupportFragmentManager().findFragmentById(R.id.ll_frag_menu_weather);
                                 if(fragmentMenuWeather != null)
                                 {
+
                                     fragmentMenuWeather.getOutPut(finalOutput);
+                                    Log.e("333MAIN_ACT", "-finalOutput-" + finalOutput);
                                 }
 
                             } catch (JSONException e) {
@@ -156,7 +168,11 @@ public class MainActivity extends AppCompatActivity{
                     }, new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(getApplicationContext(), "error searching -> " + error.toString().trim(), Toast.LENGTH_SHORT).show();
+
+                            myInterFace.methodInterface(false);
+
+                            //flagCheckCorrectRespone = false;
+                            Toast.makeText(getApplicationContext(), "error searching\n" + error.toString().trim(), Toast.LENGTH_SHORT).show();
                         }
                     });
 
@@ -363,5 +379,17 @@ public class MainActivity extends AppCompatActivity{
         });
         alertDialog.show();
     }
+
+    // интерфейс для передачи флага в другой фрагмент
+    interface MyInterFace
+    {
+        void methodInterface(Boolean bool);
+    }
+    public void setMyInterFace(MyInterFace myInterFace)
+    {
+        this.myInterFace = myInterFace;
+    }
+
+
 
 }

@@ -34,6 +34,7 @@ public class FragmentMenuWeather extends Fragment {
     TextView tvResult;
     Button btnGet, btnChoose;
     String output = "";
+
     private AlphaAnimation alphaAnim_btnGet, alphaAnim_btChoose;
 
     private ProgressBar mHorizontalProgressBar; // прогресс бар для имитации загрузки
@@ -71,6 +72,7 @@ public class FragmentMenuWeather extends Fragment {
                     if(editable.length() == 0)
                     {
                         tvResult.setText(""); // очищаем поле вывода инфо о погоде
+                        tvShowProgress.setText("");
                     }
             }
         });
@@ -79,29 +81,48 @@ public class FragmentMenuWeather extends Fragment {
             @Override
             public void onClick(View view) {
 
-               myAsyncTask myAsyncTask = new myAsyncTask();
-               myAsyncTask.execute(output); //список адресов файлов для загрузки
-
                 btnGet.setAlpha(1f); // анимания кнопки затухание
                 btnGet.startAnimation(alphaAnim_btnGet);
-//                String city = textInputEditTextCity.getText().toString().trim();
-//
-//                if(city.equals("")) // если ничего не введено, то сообщение
-//                {
-//                    Toast.makeText(getContext(), "Please, write the name of the city or country", Toast.LENGTH_SHORT).show();
-//                }
-//                else
-//                {
-//                    // проверка интернера при отправке запроса на сервер
-//                    if(CheckNetwork.isInternetAvailable(getContext())) //returns true if internet available
-//                    {
-//                        //((MainActivity)getActivity()).getWeatherDetail(city);
-//                    }
-//                    else
-//                    {
-//                        Toast.makeText(getContext(),"No Internet Connection",1000).show();
-//                    }
-//                }
+
+                String city = textInputEditTextCity.getText().toString().trim();
+
+                if (city.equals("")) // если ничего не введено, то сообщение
+                {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getContext(), "Please, write the name of the city or country", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else {
+                    // проверка интернера при отправке запроса на сервер
+                    if (CheckNetwork.isInternetAvailable(getContext())) //возвращает true, если интернет доступен
+                    {
+                        // надо bool если пользователь сначала ввел правильный адрес, а потом неправльный
+                        // и чтобы на неправильный запрос на экране не выводлась погода предыдущего запроса
+                        // сохраннего в строке output
+                            ((MainActivity)getActivity()).setMyInterFace(new MainActivity.MyInterFace() {
+                                @Override
+                                public void methodInterface(Boolean bool) {
+                                        Log.e("333FRAG_MENU","-bool-" + bool);
+                                    if(bool)
+                                    {
+                                        myAsyncTask myAsyncTask = new myAsyncTask();
+                                        myAsyncTask.execute(output); //список адресов файлов для загрузки
+                                    }
+                                }
+                            });
+
+                        ((MainActivity)getActivity()).getWeatherDetail(city);
+                    } else {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getContext(), "No Internet Connection", 1000).show();
+                            }
+                        });
+                    }
+                }
             }
         });
             // кн выбора страны чтобы посмотреть там погоду и переход во фрагмент со списоком стран
@@ -146,14 +167,8 @@ public class FragmentMenuWeather extends Fragment {
     {
         //Log.e("666","-outputStr-" + outputStr);
         output = outputStr;
-
-//        getActivity().runOnUiThread(new Runnable() { // отображение в главном потоке
-//            @Override
-//            public void run() {
-//                //tvResult.setText(outputStr);
-//            }
-//        });
     }
+
     // получение названия выбранной стары из клика адаптера и отображение в эдиттекст
     public void getChooseCityInAdapter(String selectCity)
     {
@@ -181,6 +196,7 @@ public class FragmentMenuWeather extends Fragment {
             super.onPreExecute();
             tvShowProgress.setText("data search...");
             mHorizontalProgressBar.setVisibility(View.VISIBLE);
+            mHorizontalProgressBar.setProgress(0); // показать пользователю начало процесса
         }
 
         // Методы onProgressUpdate() выполняются в потоке UI, потому мы можем смело обращаться к нашим компонентам UI.
@@ -197,24 +213,7 @@ public class FragmentMenuWeather extends Fragment {
         @Override
         protected Void doInBackground(String... urls) { // было (Void... voids)
             try {
-
                 // тяжелый код который должен быть тут
-                String city = textInputEditTextCity.getText().toString().trim();
-
-                if (city.equals("")) // если ничего не введено, то сообщение
-                {
-                    Toast.makeText(getContext(), "Please, write the name of the city or country", Toast.LENGTH_SHORT).show();
-                } else {
-                    // проверка интернера при отправке запроса на сервер
-                    if (CheckNetwork.isInternetAvailable(getContext())) //returns true if internet available
-                    {
-                        ((MainActivity)getActivity()).getWeatherDetail(city);
-                    } else {
-                        Toast.makeText(getContext(), "No Internet Connection", 1000).show();
-                    }
-                }
-
-
                 int counter = 0;
                 for (String url : urls) {
                     Log.e("666","-url-" + url);
@@ -263,4 +262,6 @@ public class FragmentMenuWeather extends Fragment {
         }
         //////////////////////////////////////////////
     }
+
+
 }
