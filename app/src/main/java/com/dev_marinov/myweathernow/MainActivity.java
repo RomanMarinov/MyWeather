@@ -7,7 +7,6 @@ import androidx.fragment.app.FragmentTransaction;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -48,7 +47,9 @@ public class MainActivity extends AppCompatActivity{
     Animation animation;
     LinearLayout llTvAnim;
     LinearLayout ll_frag_menu_weather, ll_frag_choose;
-    SharedPreferences sharedPreferences;
+    String finalOutput;
+    boolean flagCheckCorrectRespone;
+    MyInterFace myInterFace;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +91,7 @@ public class MainActivity extends AppCompatActivity{
                         @Override
                         public void onResponse(String response) {
                             Log.e("333MAIN_ACT", "-response-" + response);
+
 
                             String output = "";
                             try {
@@ -143,12 +145,20 @@ public class MainActivity extends AppCompatActivity{
                                         + "\nwind speed: " + speed + " m/s"
                                         + "\ndeg: " + deg;
 
-                                String finalOutput = output; // переменная для хранения данных о погоде
+                                finalOutput = output; // переменная для хранения данных о погоде
+                                //flagCheckCorrectRespone = true;
+
+                                myInterFace.methodInterface(true);
+
+
+
                                 // передача во врагмент данных
                                 FragmentMenuWeather fragmentMenuWeather = (FragmentMenuWeather) getSupportFragmentManager().findFragmentById(R.id.ll_frag_menu_weather);
                                 if(fragmentMenuWeather != null)
                                 {
+
                                     fragmentMenuWeather.getOutPut(finalOutput);
+                                    Log.e("333MAIN_ACT", "-finalOutput-" + finalOutput);
                                 }
 
                             } catch (JSONException e) {
@@ -158,7 +168,11 @@ public class MainActivity extends AppCompatActivity{
                     }, new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(getApplicationContext(), "error searching -> " + error.toString().trim(), Toast.LENGTH_SHORT).show();
+
+                            myInterFace.methodInterface(false);
+
+                            //flagCheckCorrectRespone = false;
+                            Toast.makeText(getApplicationContext(), "error searching\n" + error.toString().trim(), Toast.LENGTH_SHORT).show();
                         }
                     });
 
@@ -366,30 +380,16 @@ public class MainActivity extends AppCompatActivity{
         alertDialog.show();
     }
 
-    // считывает файл (для реализации офлайн режима, если нет инета,
-    // то польз. получит последние полученные данные, если делал запрос)
-    public String loadSettingString(String key,String default_value)
+    // интерфейс для передачи флага в другой фрагмент
+    interface MyInterFace
     {
-        // List_contact - имя файла, MODE_MULTI_PROCESS - доступ для всех процессов
-        sharedPreferences = getSharedPreferences("List_contact", MODE_MULTI_PROCESS);
-        return sharedPreferences.getString(key, default_value);
+        void methodInterface(Boolean bool);
+    }
+    public void setMyInterFace(MyInterFace myInterFace)
+    {
+        this.myInterFace = myInterFace;
     }
 
-    public void saveSettingString(String key, String value) {
-        // List_contact - имя файла куда будут сохраняться данные, MODE_MULTI_PROCESS - доступ для всех процессов
-        sharedPreferences = getSharedPreferences("List_contact", MODE_MULTI_PROCESS);
-        SharedPreferences.Editor ed = sharedPreferences.edit(); // edit() - редактирование файлов
-        ed.putString(key, value); // добавляем ключ и его значение
 
-        if (ed.commit()) // сохранить файл
-        {
-            //успешно записано данные в файл
-        }
-        else
-        {
-            //ошибка при записи
-            Toast.makeText(this, "Write error", Toast.LENGTH_SHORT).show();
-        }
-    }
 
 }
