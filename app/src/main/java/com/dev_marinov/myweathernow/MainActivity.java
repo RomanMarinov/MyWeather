@@ -35,6 +35,11 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -49,7 +54,14 @@ public class MainActivity extends AppCompatActivity{
     LinearLayout ll_frag_menu_weather, ll_frag_choose;
     //static String finalOutput;
     boolean flagCheckCorrectRespone;
+
     static MyInterFace myInterFace;
+
+
+    String value = "";
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +69,10 @@ public class MainActivity extends AppCompatActivity{
         setContentView(R.layout.activity_main);
 //        Log.e("333MAIN_ACT", "-начало hashMap.size-" + hashMap.size());
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+
+
+
 
         ll_frag_menu_weather = findViewById(R.id.ll_frag_menu_weather);
         ll_frag_choose = findViewById(R.id.ll_frag_choose);
@@ -76,16 +92,22 @@ public class MainActivity extends AppCompatActivity{
     }
 
     // получить данные погоды о городе. метод срабатывает только при нажатии кн get во FragmentMenuWeather
-    public void getWeatherDetail(String city) {
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                RequestWeather requestWeather = new RequestWeather(MainActivity.this);
-                requestWeather.method(city);
-            }
-        }).start();
-    }
+//    public String getWeatherDetail(String city) {
+//
+//        Log.e("333MAIN_ACT", "-city-" + city);
+//        RequestWeather requestWeather = new RequestWeather();
+//        requestWeather.setMyInterFaceString(new RequestWeather.MyInterFaceString() {
+//            @Override
+//            public void methodInterfaceString(String output) {
+//        Log.e("output=","output1="+output);
+//                value = output;
+//            }
+//        });
+//        requestWeather.method(getApplicationContext(),city);
+//
+//        Log.e("output=","value="+value);
+//        return  value;
+//    }
 
     // метод только для myAlertDialog();
     @Override
@@ -124,6 +146,7 @@ public class MainActivity extends AppCompatActivity{
         alertDialog.show();
     }
 
+
     // интерфейс для передачи флага в другой фрагмент
     interface MyInterFace
     {
@@ -133,106 +156,4 @@ public class MainActivity extends AppCompatActivity{
     {
         this.myInterFace = myInterFace;
     }
-
-//    public String method(String city)
-//    {
-//        Log.e("333MAIN_ACT", "-сработал getWeatherDetail-");
-//        String tempUrl =  "";
-//        if(!city.equals(""))
-//        {
-//            tempUrl = url + "?q=" + city + "&appid=" + appId;
-//
-//            // сайт просмотра json http://jsonviewer.stack.hu/
-//            StringRequest stringRequest = new StringRequest(Request.Method.POST, tempUrl, new Response.Listener<String>() {
-//                @Override
-//                public void onResponse(String response) {
-//                    Log.e("333MAIN_ACT", "-response-" + response);
-//
-//
-//                    String output = "";
-//                    try {
-//                        // строку response в JSONObject
-//                        JSONObject jsonObjectResponce = new JSONObject(response);
-//                        // получаем из jsonObjectResponce данные по ключу weather
-//                        JSONArray jsonArrayWeather = jsonObjectResponce.getJSONArray("weather");
-//                        // получаем из jsonArrayWeather получаем данные индекс 0
-//                        JSONObject jsonObject_O = jsonArrayWeather.getJSONObject(0);
-//                        // получаем из jsonObject_O строку description
-//                        String description = jsonObject_O.getString("description"); // -----------------> данные для отображения=
-//
-//                        // получаем из jsonObjectResponce данные по ключу main
-//                        JSONObject jsonObjectMain = jsonObjectResponce.getJSONObject("main");
-//                        // получаем из jsonObjectMain double значение по ключу temp
-//                        double temp = jsonObjectMain.getDouble("temp") - 273.15; // -----------------> данные для отображения=
-//                        // получаем из jsonObjectMain double значение по ключу feels_like
-//                        double feelsLike = jsonObjectMain.getDouble("feels_like") - 273.15; // -----------------> данные для отображения=
-//                        // получаем из jsonObjectMain double значение по ключу temp_min
-//                        double temp_min = jsonObjectMain.getDouble("temp_min") - 273.15; // -----------------> данные для отображения=
-//                        // получаем из jsonObjectMain double значение по ключу temp_max
-//                        double temp_max = jsonObjectMain.getDouble("temp_max") - 273.15; // -----------------> данные для отображения=
-//                        // получаем из jsonObjectMain int значение по ключу pressure
-//                        int pressure = jsonObjectMain.getInt("pressure"); // -----------------> данные для отображения=
-//                        // получаем из jsonObjectMain int значение по ключу humidity
-//                        int humidity = jsonObjectMain.getInt("humidity"); // -----------------> данные для отображения=
-//
-//                        // получаем из jsonObjectResponce данные int по ключу clouds
-//                        JSONObject jsonObjectClouds = jsonObjectResponce.getJSONObject("clouds"); // -----------------> данные для отображения=
-//                        int clouds = jsonObjectClouds.getInt("all");
-//
-//                        // получаем из jsonObjectResponce данные по ключу wind
-//                        JSONObject jsonObjectWind = jsonObjectResponce.getJSONObject("wind");
-//                        // получаем из jsonObjectWind строку speed
-//                        String speed = jsonObjectWind.getString("speed"); // -----------------> данные для отображения=
-//                        // получаем из jsonObjectWind строку deg
-//                        String deg = jsonObjectWind.getString("deg"); // -----------------> данные для отображения=
-//
-//                        // получаем из jsonObjectResponce строку name
-//                        String name = jsonObjectResponce.getString("name"); // -----------------> данные для отображения=
-//
-//                        output = "City: " + name
-//                                + "\ndescription: " + description
-//                                + "\ntemp: " + decimalFormat.format(temp)  + " ℃"
-//                                + "\ntemp min: " + decimalFormat.format(temp_min) + " ℃"
-//                                + "\ntemp max: " + decimalFormat.format(temp_max)  + " ℃"
-//                                + "\nfeels like: " + decimalFormat.format(feelsLike) + " ℃"
-//                                + "\npreassure: " + pressure + " hPa"
-//                                + "\nhumidity: " + humidity + " %"
-//                                + "\ncloudnes: " + clouds + " %"
-//                                + "\nwind speed: " + speed + " m/s"
-//                                + "\ndeg: " + deg;
-//
-//                        //finalOutput = output; // переменная для хранения данных о погоде
-//                        //flagCheckCorrectRespone = true;
-//
-//                        myInterFace.methodInterface(true);
-//
-//                        // передача во врагмент данных
-//                        FragmentMenuWeather fragmentMenuWeather = (FragmentMenuWeather) getSupportFragmentManager().findFragmentById(R.id.ll_frag_menu_weather);
-//                        if(fragmentMenuWeather != null)
-//                        {
-//                            fragmentMenuWeather.getOutPut(output);
-//                            Log.e("333MAIN_ACT", "-output-" + output);
-//                        }
-//
-//                    } catch (JSONException e) {
-//                        Log.e("333MAIN_ACT", "-try catch-" + e);
-//                    }
-//                }
-//            }, new Response.ErrorListener() {
-//                @Override
-//                public void onErrorResponse(VolleyError error) {
-//
-//                    myInterFace.methodInterface(false);
-//
-//                    //flagCheckCorrectRespone = false;
-//                    Toast.makeText(getApplicationContext(), "error searching\n" + error.toString().trim(), Toast.LENGTH_SHORT).show();
-//                }
-//            });
-//
-//            RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
-//            requestQueue.add(stringRequest);
-//        }
-//        return "333";
-//    }
-
 }

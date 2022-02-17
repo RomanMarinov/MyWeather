@@ -13,6 +13,11 @@ public class MainActivityTest {
     public void method() {
         Log.e("hello", "-hello-");
 
+  //RequestWeather requestWeather = new RequestWeather(this);
+
+
+
+
         //RequestWeather classReq = new RequestWeather();
         //classReq.method("");
 
