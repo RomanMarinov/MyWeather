@@ -80,12 +80,11 @@ public class FragmentMenuWeather extends Fragment {
         btnGet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 btnGet.setAlpha(1f); // анимания кнопки затухание
                 btnGet.startAnimation(alphaAnim_btnGet);
 
                 String city = textInputEditTextCity.getText().toString().trim();
-
+                Log.e("333MAIN_ACT", "-city1-" + city);
                 if (city.equals("")) // если ничего не введено, то сообщение
                 {
                     getActivity().runOnUiThread(new Runnable() {
@@ -98,22 +97,27 @@ public class FragmentMenuWeather extends Fragment {
                     // проверка интернера при отправке запроса на сервер
                     if (CheckNetwork.isInternetAvailable(getContext())) //возвращает true, если интернет доступен
                     {
+                        RequestWeather requestWeather = new RequestWeather(getContext());
+                        requestWeather.method(getContext(), city);
+                        //String string = ((MainActivity)getActivity()).getWeatherDetail(city);
+                        //Log.e("333FRAG_MENU","-test-" + string);
                         // надо bool если пользователь сначала ввел правильный адрес, а потом неправльный
                         // и чтобы на неправильный запрос на экране не выводлась погода предыдущего запроса
                         // сохраннего в строке output
-                            ((MainActivity)getActivity()).setMyInterFace(new MainActivity.MyInterFace() {
+                        ((MainActivity)getActivity()).setMyInterFace(new MainActivity.MyInterFace() {
                                 @Override
                                 public void methodInterface(Boolean bool) {
+                                   // Log.e("333FRAG_MENU","-string-" + string);
                                         Log.e("333FRAG_MENU","-bool-" + bool);
                                     if(bool)
                                     {
                                         myAsyncTask myAsyncTask = new myAsyncTask();
-                                        myAsyncTask.execute(output); //список адресов файлов для загрузки
+                                        myAsyncTask.execute(output); // описание погоды
                                     }
                                 }
                             });
 
-                        ((MainActivity)getActivity()).getWeatherDetail(city);
+
                     } else {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
@@ -169,7 +173,7 @@ public class FragmentMenuWeather extends Fragment {
         output = outputStr;
     }
 
-    // получение названия выбранной стары из клика адаптера и отображение в эдиттекст
+    // получение названия выбранной страны из клика адаптера и отображение в эдиттекст
     public void getChooseCityInAdapter(String selectCity)
     {
         getActivity().runOnUiThread(new Runnable() {
