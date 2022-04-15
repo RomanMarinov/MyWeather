@@ -10,4 +10,6 @@
 
     <color name="grey">#BAAEAE</color>
     <color name="dividerColor">#AFAFAF</color>
+
+    <color name="greyLight">#00FFFFFF</color>
 </resources>
