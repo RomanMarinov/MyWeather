@@ -3,14 +3,22 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/I_AM/PROFESSION_DEVELOPER/junior interview/MyWeatherNow/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.24010416666666667" />
         <entry key="..\:/I_AM/PROFESSION_DEVELOPER/junior interview/MyWeatherNow/app/src/main/res/drawable-v24/img_search_2.xml" value="0.24010416666666667" />
         <entry key="..\:/I_AM/PROFESSION_DEVELOPER/junior interview/MyWeatherNow/app/src/main/res/drawable/greenprogress.xml" value="0.24010416666666667" />
+        <entry key="..\:/I_AM/PROFESSION_DEVELOPER/junior interview/MyWeatherNow/app/src/main/res/drawable/ic_launcher_background.xml" value="0.24010416666666667" />
+        <entry key="..\:/I_AM/PROFESSION_DEVELOPER/junior interview/MyWeatherNow/app/src/main/res/drawable/img_pen.xml" value="0.14791666666666667" />
         <entry key="..\:/I_AM/PROFESSION_DEVELOPER/junior interview/MyWeatherNow/app/src/main/res/drawable/img_search.xml" value="0.24010416666666667" />
         <entry key="..\:/I_AM/PROFESSION_DEVELOPER/junior interview/MyWeatherNow/app/src/main/res/layout/activity_main.xml" value="0.20989583333333334" />
-        <entry key="..\:/I_AM/PROFESSION_DEVELOPER/junior interview/MyWeatherNow/app/src/main/res/layout/fragment_choose.xml" value="0.3084795321637427" />
+        <entry key="..\:/I_AM/PROFESSION_DEVELOPER/junior interview/MyWeatherNow/app/src/main/res/layout/activity_main_horiz.xml" value="0.22395833333333334" />
+        <entry key="..\:/I_AM/PROFESSION_DEVELOPER/junior interview/MyWeatherNow/app/src/main/res/layout/fragment_choose.xml" value="0.19199999414062519" />
+        <entry key="..\:/I_AM/PROFESSION_DEVELOPER/junior interview/MyWeatherNow/app/src/main/res/layout/fragment_choose_horizontal.xml" value="0.19199999414062519" />
         <entry key="..\:/I_AM/PROFESSION_DEVELOPER/junior interview/MyWeatherNow/app/src/main/res/layout/fragment_menu_weather.xml" value="0.25343999226562525" />
+        <entry key="..\:/I_AM/PROFESSION_DEVELOPER/junior interview/MyWeatherNow/app/src/main/res/layout/fragment_menu_weather_horizontal.xml" value="0.19199999414062519" />
+        <entry key="..\:/I_AM/PROFESSION_DEVELOPER/junior interview/MyWeatherNow/app/src/main/res/layout/fragment_start_animation.xml" value="0.22395833333333334" />
+        <entry key="..\:/I_AM/PROFESSION_DEVELOPER/junior interview/MyWeatherNow/app/src/main/res/layout/fragment_start_animation_horiz.xml" value="0.22395833333333334" />
         <entry key="..\:/I_AM/PROFESSION_DEVELOPER/junior interview/MyWeatherNow/app/src/main/res/layout/row_last_message.xml" value="0.22395833333333334" />
-        <entry key="..\:/I_AM/PROFESSION_DEVELOPER/junior interview/MyWeatherNow/app/src/main/res/layout/row_list_city.xml" value="0.4344919786096257" />
+        <entry key="..\:/I_AM/PROFESSION_DEVELOPER/junior interview/MyWeatherNow/app/src/main/res/layout/row_list_city.xml" value="0.25343999226562525" />
         <entry key="..\:/I_AM/PROFESSION_DEVELOPER/junior interview/MyWeatherNow/app/src/main/res/xml/network_security_config.xml" value="0.22395833333333334" />
       </map>
     </option>

@@ -1,15 +1,23 @@
 package com.dev_marinov.myweathernow;
 
+import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -45,78 +53,89 @@ import cz.msebera.android.httpclient.Header;
 
 public class MainActivity extends AppCompatActivity{
 
-    TextView tvM, tvY, tvW, tvE1, tvA, tvT, tvH, tvE2, tvR;
     static final String url = "https://api.openweathermap.org/data/2.5/weather";
     static final String appId = "840d7fe8bd94345a170e94b449c68646";
     static final DecimalFormat decimalFormat = new DecimalFormat("#.##");
-    Animation animation;
-    LinearLayout llTvAnim;
-    LinearLayout ll_frag_menu_weather, ll_frag_choose;
-    //static String finalOutput;
-    boolean flagCheckCorrectRespone;
-
-    static MyInterFace myInterFace;
-
-
-    String value = "";
-
-
-
+    // макеты для управления backstack
+    LinearLayout ll_frag_start_anim, ll_frag_menu_weather, ll_frag_choose;
+    static MyInterFaceSuccessfulResponse myInterFaceSuccessfulResponse; // удачный ответ по api или нет
+    static MyInterFacePositionClickCode myInterFacePositionClickCode; // передача code из адаптера клки по item
+    static MyInterFacePositionClickName myInterFacePositionClickName; // передача name из адаптера клки по item
+    String myPositionName = ""; // сюда сохраняю название страны из списка, на которую кликнул в адаптере
+    int myPositionCode; // // сюда сохраняю позицию страны у Code из списка, на которую кликнул в адаптере
+    // булева для разделения (if-else) помещения переменной int в scrollToPositionWithOffset
+    // если пользовался живым поиском во frgamentChoose и выбрал страну, то помещу ее позицию в scrollToPositionWithOffset
+    // иначе в scrollToPositionWithOffset поместиться переменная из адаптера от findFirstVisibleItemPosition
+    boolean flag = false;
+    int lastVisibleItemPortrait;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-//        Log.e("333MAIN_ACT", "-начало hashMap.size-" + hashMap.size());
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-
-
-
-
+        ll_frag_start_anim = findViewById(R.id.ll_frag_start_anim);
         ll_frag_menu_weather = findViewById(R.id.ll_frag_menu_weather);
         ll_frag_choose = findViewById(R.id.ll_frag_choose);
-        llTvAnim = findViewById(R.id.llTvAnim);
-        tvM = findViewById(R.id.tvM);
-        tvY = findViewById(R.id.tvY);
-        tvW = findViewById(R.id.tvW);
-        tvE1 = findViewById(R.id.tvE1);
-        tvA = findViewById(R.id.tvA);
-        tvT = findViewById(R.id.tvT);
-        tvH = findViewById(R.id.tvH);
-        tvE2 = findViewById(R.id.tvE2);
-        tvR = findViewById(R.id.tvR);
 
-        StartAnimation startAnimation = new StartAnimation(this);
-        startAnimation.wordsAnimation(); // анимация букв при старте приложения
+
+        setWindow();
+
+        FragmentStartAnimation fragmentStartAnimation = new FragmentStartAnimation();
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.ll_frag_start_anim, fragmentStartAnimation);
+        fragmentTransaction.commit();
+
+        setMyInterFacePositionClickName(new MainActivity.MyInterFacePositionClickName() {
+            @Override
+            public void methodInterfacePosClick(String posName) {
+                myPositionName = posName;
+                Log.e("333", "myPositionName = " + myPositionName);
+            }
+        });
+
+        setMyInterFacePositionClickCode(new MyInterFacePositionClickCode() {
+            @Override
+            public void methodInterfacePosClickCode(int CodePos) {
+                myPositionCode = CodePos;
+            }
+        });
+
     }
 
-    // получить данные погоды о городе. метод срабатывает только при нажатии кн get во FragmentMenuWeather
-//    public String getWeatherDetail(String city) {
-//
-//        Log.e("333MAIN_ACT", "-city-" + city);
-//        RequestWeather requestWeather = new RequestWeather();
-//        requestWeather.setMyInterFaceString(new RequestWeather.MyInterFaceString() {
-//            @Override
-//            public void methodInterfaceString(String output) {
-//        Log.e("output=","output1="+output);
-//                value = output;
-//            }
-//        });
-//        requestWeather.method(getApplicationContext(),city);
-//
-//        Log.e("output=","value="+value);
-//        return  value;
-//    }
+    public void setWindow()
+    {
+        Window window = getWindow();
+        // установка градиента анимации на toolbar
+        getWindow().getDecorView().setSystemUiVisibility(SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+        Drawable background = getResources().getDrawable(R.drawable.nebo_ver_1);
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        // FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS Флаг, указывающий, что это Окно отвечает за отрисовку фона для системных полос.
+        // Если установлено, системные панели отображаются с прозрачным фоном, а соответствующие области в этом окне заполняются цветами,
+        // указанными в Window#getStatusBarColor()и Window#getNavigationBarColor().
+        window.setStatusBarColor(getResources().getColor(android.R.color.transparent));
+        window.setNavigationBarColor(getResources().getColor(android.R.color.black));
+        window.setBackgroundDrawable(background);
+    }
 
     // метод только для myAlertDialog();
     @Override
     public void onBackPressed()
     {
+        Log.e("222MAIN_ACT","ДО счетчик=" + getSupportFragmentManager().getBackStackEntryCount());
+
         // как только будет ноль (последний экран) выполниться else
         if(getSupportFragmentManager().getBackStackEntryCount() > 0) {
-            Log.e("MAIN_ACT","getFragmentManager().getBackStackEntryCount()== "
-                    + getSupportFragmentManager().getBackStackEntryCount() );
+            Log.e("222MAIN_ACT","ПОСЛЕ счетчик=" + getSupportFragmentManager().getBackStackEntryCount());
+
+            // часть кода для того чтобы я просто мог только нажать кн назад и удалить view
+            if(getSupportFragmentManager().getBackStackEntryCount() == 1)
+            {
+                Log.e("222MAIN_ACT","фрагмент должен был удалиться");
+                ll_frag_choose.removeAllViews();
+            }
+
             super.onBackPressed();
         }
         else {
@@ -148,12 +167,34 @@ public class MainActivity extends AppCompatActivity{
 
 
     // интерфейс для передачи флага в другой фрагмент
-    interface MyInterFace
+    interface MyInterFaceSuccessfulResponse
     {
-        void methodInterface(Boolean bool);
+        void methodInterfaceSuccessfulResponse(Boolean bool);
     }
-    public void setMyInterFace(MyInterFace myInterFace)
+    public void setMyInterFaceSuccessfulResponse(MyInterFaceSuccessfulResponse myInterFaceSuccessfulResponse)
     {
-        this.myInterFace = myInterFace;
+        this.myInterFaceSuccessfulResponse = myInterFaceSuccessfulResponse;
     }
+
+    // интерфейс для передачи флага в другой фрагмент
+    interface MyInterFacePositionClickCode
+    {
+        void methodInterfacePosClickCode(int CodePos);
+    }
+    public void setMyInterFacePositionClickCode(MyInterFacePositionClickCode myInterFacePositionClickCode)
+    {
+        this.myInterFacePositionClickCode = myInterFacePositionClickCode;
+    }
+
+    // интерфейс для передачи флага в другой фрагмент
+    interface MyInterFacePositionClickName
+    {
+        void methodInterfacePosClick(String posName);
+    }
+    public void setMyInterFacePositionClickName(MyInterFacePositionClickName myInterFacePositionClickName)
+    {
+        this.myInterFacePositionClickName = myInterFacePositionClickName;
+    }
+
+
 }

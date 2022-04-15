@@ -1,12 +1,17 @@
 package com.dev_marinov.myweathernow;
 
 import android.app.AlertDialog;
+import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -29,35 +34,114 @@ import java.util.concurrent.TimeUnit;
 
 public class FragmentMenuWeather extends Fragment {
 
-    View frag;
-    TextInputEditText textInputEditTextCity;
-    TextView tvResult;
-    Button btnGet, btnChoose;
-    String output = "";
-
-    private AlphaAnimation alphaAnim_btnGet, alphaAnim_btChoose;
-
+    TextInputEditText textInputEditTextCity; // данные ввода города/страны
+    TextView tvResult; // поле вывода информации о погоде
+    Button btnGet, btnChoose; // кн получить погоду и кн перехода во fragmentChoose, чтобы выбрать страну
+    String output = ""; // переменная для хранения инфо о погоде
+    private AlphaAnimation alphaAnim_btnGet, alphaAnim_btChoose; // анимация нажатия кнопок
     private ProgressBar mHorizontalProgressBar; // прогресс бар для имитации загрузки
     TextView tvShowProgress; // сообщение о процессе загрузки
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    ViewGroup viewGroup; // разметка, которая позволяет расположить один или несколько View.
+    // layoutInflater класс, используемый для преобразования XML-файла макета в объекты представления динамическим способом
+    LayoutInflater layoutInflater;
 
-        frag = inflater.inflate(R.layout.fragment_menu_weather, container, false);
+    View myView;
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        //return super.onCreateView(inflater, container, savedInstanceState);
+
+        Log.e("222","-зашел во FragmentMenuWeather-");
+
+        // установить контейнер viewGroup и обработчик инфлятора
+        this.viewGroup = container;
+        this.layoutInflater = inflater;
+
+        // отображать желаемую разметку и возвращать view в initInterface .
+        // onCreateView() возвращает объект View, который является корневым элементом разметки фрагмента.
+        return initInterface();
+    }
+
+    public View initInterface() {
+        View view;
+
+        // если уже есть надутый макет, удалить его.
+        if (viewGroup != null)
+        {
+            viewGroup.removeAllViewsInLayout(); // отличается от removeAllView
+        }
+        else
+        {
+            Log.e("222","FragmentMenuWeather viewGroup пустой");
+        }
+        // получить экран ориентации
+        int orientation = getActivity().getResources().getConfiguration().orientation;
+
+        // раздуть соответствующий макет в зависимости от ориентации экрана
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            view = layoutInflater.inflate(R.layout.fragment_menu_weather, viewGroup, false);
+            Log.e("222","портрет orientation =" + orientation);
+
+            setLayout(view);
+        } else {
+            view = layoutInflater.inflate(R.layout.fragment_menu_weather_horizontal, viewGroup, false);
+            Log.e("222","альбом orientation =" + orientation);
+
+            setLayout(view);
+        }
+
+        return view; // в onCreateView() возвращаем объект View, который является корневым элементом разметки фрагмента.
+    }
+
+    // метод срабатывает когда происходит смена ориентации экрана.
+    // мы сохраняем содержимое views в переменные и перезаписываем на новое содержимое
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        //Log.e("222","-onConfigurationChanged FragmentMenuWeather-");
+        // сохранить текст, который пользователь уже набрал
+        String textInputEditTextCityString = textInputEditTextCity.getText().toString();
+        // сохранить текст, который отобразился в textview tvResult
+        String saveOutPut = tvResult.getText().toString();
+        // сохранить текст, который отобразился в textview tvShowProgress
+        String saveShowProgress = tvShowProgress.getText().toString();
+
+        // создать новый макет
+        View view = initInterface();
+        // отображать текст, который пользователь уже набрал в edittext
+        textInputEditTextCity.setText(textInputEditTextCityString);
+        // отобразить текст который был до этого в textview tvResult
+        tvResult.setText(saveOutPut);
+        // отобразить текст который был до этого в textview tvShowProgress
+        tvShowProgress.setText(saveShowProgress);
+        // отображать новую раскладку на экране
+        viewGroup.addView(view);
+
+        super.onConfigurationChanged(newConfig);
+        //getActivity().setContentView(R.layout.fragment_choose);
+        Log.e("222MAIN_ACT","ДО счетчик FragmentMenuWeather  прочитано при повороте="
+                + getActivity().getSupportFragmentManager().getBackStackEntryCount());
+    }
+
+
+
+    public void setLayout(View view)
+    {
+        myView = view;
+        Log.e("222","-зашел в setLayout-");
 
         animationButtons(); // анимация нажатий всех кнопок
 
-        Log.e("333FRAG_MENU","-запустился FragmentMenuWeather-");
+        // найти views в макете
+        textInputEditTextCity = view.findViewById(R.id.textInputEditTextCity);
 
-        textInputEditTextCity = frag.findViewById(R.id.textInputEditTextCity);
-        tvResult = frag.findViewById(R.id.tvResult);
-        btnGet = frag.findViewById(R.id.btnGet);
-        btnChoose = frag.findViewById(R.id.btnChoose);
+        tvResult = view.findViewById(R.id.tvResult);
+        btnGet = view.findViewById(R.id.btnGet);
+        btnChoose = view.findViewById(R.id.btnChoose);
+        tvShowProgress = view.findViewById(R.id.tvShowProgress);
+        mHorizontalProgressBar = view.findViewById(R.id.mHorizontalProgressBar);
 
-        tvShowProgress = frag.findViewById(R.id.tvShowProgress);
-        mHorizontalProgressBar = frag.findViewById(R.id.mHorizontalProgressBar);
-        mHorizontalProgressBar.setVisibility(View.INVISIBLE);
+        mHorizontalProgressBar.setVisibility(View.INVISIBLE); // скрыть горизонтальный прогресс бар
 
         // если поле ввода для получения погоды будет пусто и поле вывода инфо о погоде тоже станет пустым
         textInputEditTextCity.addTextChangedListener(new TextWatcher() {
@@ -69,57 +153,58 @@ public class FragmentMenuWeather extends Fragment {
             }
             @Override
             public void afterTextChanged(Editable editable) {
-                    if(editable.length() == 0)
-                    {
-                        tvResult.setText(""); // очищаем поле вывода инфо о погоде
-                        tvShowProgress.setText("");
-                    }
+                if(editable.length() == 0)
+                {
+                    tvResult.setText(""); // очищаем поле вывода инфо о погоде
+                    tvShowProgress.setText(""); // очищаем сообщение о процессе загрузки
+                }
             }
         });
-            // кн получения данных о погоде
+        // кн получения данных о погоде с проверкой интернета
+        // Запускам метод getDataWeather в классе RequestWeather и ждем ответ от interface methodInterface булеву
+        // если true - данные из сети получены, если false - ошибка в запросе (в onErrorResponse)
         btnGet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 btnGet.setAlpha(1f); // анимания кнопки затухание
-                btnGet.startAnimation(alphaAnim_btnGet);
+                btnGet.startAnimation(alphaAnim_btnGet); // запуск анимации
 
+                // записываем в переменную что ввел пользователь и удаляем пробелы
                 String city = textInputEditTextCity.getText().toString().trim();
-                Log.e("333MAIN_ACT", "-city1-" + city);
-                if (city.equals("")) // если ничего не введено, то сообщение
+
+                if (city.equals("")) // если ничего не введено, то сообщение "Please, write the name of the city or country"
                 {
-                    getActivity().runOnUiThread(new Runnable() {
+                    getActivity().runOnUiThread(new Runnable() { // тост в главном полтоке
                         @Override
                         public void run() {
                             Toast.makeText(getContext(), "Please, write the name of the city or country", Toast.LENGTH_SHORT).show();
                         }
                     });
-                } else {
-                    // проверка интернера при отправке запроса на сервер
+                } else { // иначе если что-то введено, то
+                    // проверка наличия интернера на устройстве. если есть (true), то передаем параметры в getDataWeather
+                    // и ждем ответа от methodInterface булеву переменную
                     if (CheckNetwork.isInternetAvailable(getContext())) //возвращает true, если интернет доступен
                     {
                         RequestWeather requestWeather = new RequestWeather(getContext());
-                        requestWeather.method(getContext(), city);
-                        //String string = ((MainActivity)getActivity()).getWeatherDetail(city);
-                        //Log.e("333FRAG_MENU","-test-" + string);
-                        // надо bool если пользователь сначала ввел правильный адрес, а потом неправльный
-                        // и чтобы на неправильный запрос на экране не выводлась погода предыдущего запроса
-                        // сохраннего в строке output
-                        ((MainActivity)getActivity()).setMyInterFace(new MainActivity.MyInterFace() {
-                                @Override
-                                public void methodInterface(Boolean bool) {
-                                   // Log.e("333FRAG_MENU","-string-" + string);
-                                        Log.e("333FRAG_MENU","-bool-" + bool);
-                                    if(bool)
-                                    {
-                                        myAsyncTask myAsyncTask = new myAsyncTask();
-                                        myAsyncTask.execute(output); // описание погоды
-                                    }
+                        requestWeather.getDataWeather(getContext(), city);
+
+                        // ожидание ответа от methodInterface
+                        ((MainActivity)getActivity()).setMyInterFaceSuccessfulResponse(new MainActivity.MyInterFaceSuccessfulResponse() {
+                            @Override
+                            public void methodInterfaceSuccessfulResponse(Boolean bool) {
+                                if(bool) // сработает только если придет true (т.е. ответ от сервера есть)
+                                {
+                                    MyAsyncTask myAsyncTask = new MyAsyncTask(); // экземпляр класса задач
+                                    myAsyncTask.execute(output); // передаем параметр в виде описания погоды
                                 }
-                            });
+                            }
+                        });
 
 
-                    } else {
-                        getActivity().runOnUiThread(new Runnable() {
+
+
+                    } else { // иначе сообщение пользователю об отвутствия интернета
+                        getActivity().runOnUiThread(new Runnable() { // тост в гланом потоке
                             @Override
                             public void run() {
                                 Toast.makeText(getContext(), "No Internet Connection", 1000).show();
@@ -129,22 +214,20 @@ public class FragmentMenuWeather extends Fragment {
                 }
             }
         });
-            // кн выбора страны чтобы посмотреть там погоду и переход во фрагмент со списоком стран
+        // кн перехода во fragmentChoose со списоком страна для выбора
         btnChoose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.e("333FRAG_MENU","-нажал на кн btnChoose-");
-                btnChoose.setAlpha(1f); // анимания кнопки затухание
-                btnChoose.startAnimation(alphaAnim_btChoose);
+                Log.e("222","-btnChoose.setOnClickListener-");
 
-                // проверка интернера при отправке запроса на сервер
-                if(CheckNetwork.isInternetAvailable(getContext())) //returns true if internet available
+                btnChoose.setAlpha(1f); // анимания кнопки затухание
+                btnChoose.startAnimation(alphaAnim_btChoose); // запуск анимации кн
+
+                // проверка интернера при отправке нового api запроса на сервер со списком стран
+                if(CheckNetwork.isInternetAvailable(getContext())) // возвращает true, если интернет доступен
                 {
-                    textInputEditTextCity.setText("");
-                    tvResult.setText("");
-                    tvShowProgress.setText("");
                     // задержка перехода во фрагмент нужна для того, чтобы до конца сработала анимация нажатия кнопки
-                    // а то не красиво
+                    // а то не красиво :-)
                     new Timer().schedule(new TimerTask() {
                         @Override
                         public void run() {
@@ -155,21 +238,20 @@ public class FragmentMenuWeather extends Fragment {
                             fragmentTransaction.addToBackStack("ll_frag_choose");
                             fragmentTransaction.commit();
                         }
-                    },400);
+                    },200);
                 }
-                else
+                else // иначе сообщение пользователю об отвутствия интернета
                 {
-                    Toast.makeText(getContext(),"No Internet Connection",1000).show();
+                    Toast.makeText(getContext(),"No Internet Connection",Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
-        return frag;
     }
 
     public void getOutPut(String outputStr) // метод получения данных погоды и отображения
     {
-        //Log.e("666","-outputStr-" + outputStr);
+        Log.e("222","-outputStr-" + outputStr);
         output = outputStr;
     }
 
@@ -180,6 +262,9 @@ public class FragmentMenuWeather extends Fragment {
             @Override
             public void run() {
                 textInputEditTextCity.setText(selectCity);
+                Log.e("222","-textInputEditTextCity содержимое-" + textInputEditTextCity.getText().toString());
+
+                //((MainActivity)getActivity()).ll_frag_choose.setVisibility(View.GONE);
             }
         });
     }
@@ -192,9 +277,8 @@ public class FragmentMenuWeather extends Fragment {
         alphaAnim_btChoose.setDuration(500);
     }
 
-    //////////////////////////////////////////////
-    class myAsyncTask extends AsyncTask<String, Integer, Void> {
-
+    // задача постепенно отображать пользовательскую информацию (статус загрузки, успеха и т.д.) при получении данных о погоде
+    class MyAsyncTask extends AsyncTask<String, Integer, Void> {
         @Override
         protected void onPreExecute() { // мы устанавливаем начальный текст перед выполнением задачи.
             super.onPreExecute();
@@ -212,7 +296,6 @@ public class FragmentMenuWeather extends Fragment {
             // tvShowProgress.setText("Этаж: " + values[0]); // было
             mHorizontalProgressBar.setProgress(values[0]);
         }
-
 
         @Override
         protected Void doInBackground(String... urls) { // было (Void... voids)
@@ -260,12 +343,10 @@ public class FragmentMenuWeather extends Fragment {
             },1000);
         }
 
-// Здесь мы реализуем свою логику тяжёлой работы. Пока у нас здесь просто пауза на одну секунду.
+        // Здесь мы реализуем свою логику тяжёлой работы. Пока у нас здесь просто пауза на одну секунду.
         private void getFloor(int floor) throws InterruptedException {
             TimeUnit.SECONDS.sleep(1);
         }
-        //////////////////////////////////////////////
     }
-
 
 }

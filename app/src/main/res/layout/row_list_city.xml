@@ -16,7 +16,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:textSize="17sp"
-
             android:minLines="2"
             android:textColor="@android:color/white"
             android:text="city"
@@ -30,7 +29,7 @@
 
         <TextView
             android:id="@+id/tvCode"
-            android:layout_width="50dp"
+            android:layout_width="wrap_content"
             android:layout_height="50dp"
             android:textSize="17sp"
             android:textColor="@android:color/white"
@@ -41,6 +40,8 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             />
+
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

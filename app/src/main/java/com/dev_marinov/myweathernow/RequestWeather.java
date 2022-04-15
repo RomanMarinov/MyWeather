@@ -28,11 +28,9 @@ class RequestWeather  {
     }
 
     public  String output = "";
-
     static MyInterFaceString myInterFaceString;
 
-
-    public void method(Context context, String city) {
+    public void getDataWeather(Context context, String city) {
 
     Log.e("333MAIN_ACT", "-сработал getWeatherDetail-");
     String tempUrl = "";
@@ -46,9 +44,7 @@ class RequestWeather  {
             public void onResponse(String response)
             {
                 Log.e("run","run=3");
-
                 Log.e("333MAIN_ACT", "-response-" + response);
-
                 try {
                     // строку response в JSONObject
                     JSONObject jsonObjectResponce = new JSONObject(response);
@@ -105,8 +101,7 @@ class RequestWeather  {
 
                     Log.e("333MAIN_ACT", "-output-" + output);
 
-
-                    MainActivity.myInterFace.methodInterface(true);
+                    MainActivity.myInterFaceSuccessfulResponse.methodInterfaceSuccessfulResponse(true);
 
                         // передача во врагмент данных
                     FragmentMenuWeather fragmentMenuWeather = (FragmentMenuWeather) ((MainActivity)context).getSupportFragmentManager().findFragmentById(R.id.ll_frag_menu_weather);
@@ -115,9 +110,6 @@ class RequestWeather  {
                         fragmentMenuWeather.getOutPut(output);
                         Log.e("333MAIN_ACT", "-output23-" + output);
                     }
-
-
-
                 } catch (JSONException e) {
                     Log.e("333MAIN_ACT", "-try catch-" + e);
                 }
@@ -126,10 +118,8 @@ class RequestWeather  {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-               MainActivity.myInterFace.methodInterface(false);
-
-                Toast.makeText(context.getApplicationContext(), "error searching" + error.toString().trim(), Toast.LENGTH_SHORT).show();
-
+               MainActivity.myInterFaceSuccessfulResponse.methodInterfaceSuccessfulResponse(false);
+               Toast.makeText(context.getApplicationContext(), "error searching" + error.toString().trim(), Toast.LENGTH_SHORT).show();
             }
         });
 
