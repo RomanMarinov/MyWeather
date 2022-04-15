@@ -58,7 +58,7 @@ public class FragmentMenuWeather extends Fragment {
         this.viewGroup = container;
         this.layoutInflater = inflater;
 
-        // отображать желаемую разметку и возвращать view в initInterface .
+        // отображать желаемую разметку и возвращать view в initInterface .//
         // onCreateView() возвращает объект View, который является корневым элементом разметки фрагмента.
         return initInterface();
     }
